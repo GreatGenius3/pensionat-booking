@@ -65,15 +65,25 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy-railway:
+  deploy-k8s:
     needs: build-and-push
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main'
     steps:
-      - name: Trigger Railway Deploy
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+
+      - name: Configure kubectl
         run: |
-          curl -X POST \
-            -H "Authorization: Bearer ${{ secrets.RAILWAY_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d '{"projectId": "${{ secrets.RAILWAY_PROJECT_ID }}"}' \
-            https://backboard.railway.app/graphql/v2
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
+
+      - name: Update deployment image
+        run: |
+          kubectl set image deployment/booking-service booking-service=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Restart deployment
+        run: kubectl rollout restart deployment/booking-service

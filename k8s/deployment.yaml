@@ -16,8 +16,8 @@ spec:
     spec:
       containers:
       - name: booking-service
-        image: booking-service:latest
-        imagePullPolicy: IfNotPresent
+        image: ghcr.io/GreatGenius3/pensionat-booking:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
