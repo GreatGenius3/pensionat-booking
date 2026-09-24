@@ -6,6 +6,8 @@ metadata:
     app: mysql
 spec:
   replicas: 1
+  strategy:
+    type: Recreate
   selector:
     matchLabels:
       app: mysql
@@ -27,6 +29,14 @@ spec:
               key: password
         - name: MYSQL_DATABASE
           value: pensionat_bokningar
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+        readinessProbe:
+          exec:
+            command: ["mysqladmin", "ping", "-h", "localhost"]
+          initialDelaySeconds: 15
+          periodSeconds: 10
         resources:
           requests:
             memory: "256Mi"
@@ -34,3 +44,7 @@ spec:
           limits:
             memory: "512Mi"
             cpu: "500m"
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: mysql-pvc

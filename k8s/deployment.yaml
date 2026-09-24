@@ -32,6 +32,16 @@ spec:
             secretKeyRef:
               name: mysql-secret
               key: password
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 10
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 60
+          periodSeconds: 20
         resources:
           requests:
             memory: "512Mi"
