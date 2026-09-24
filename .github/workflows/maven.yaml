@@ -89,7 +89,16 @@ jobs:
             rm -f $HOME/.kube/config.decoded
           fi
           chmod 600 $HOME/.kube/config
-          kubectl config current-context
+          CURRENT_CONTEXT="$(kubectl config current-context 2>/dev/null || true)"
+          if [ -z "$CURRENT_CONTEXT" ]; then
+            CURRENT_CONTEXT="$(kubectl config get-contexts -o name | head -n 1)"
+            if [ -z "$CURRENT_CONTEXT" ]; then
+              echo "KUBE_CONFIG innehåller inga Kubernetes-contexts. Kontrollera GitHub Secret KUBE_CONFIG."
+              exit 1
+            fi
+            kubectl config use-context "$CURRENT_CONTEXT"
+          fi
+          echo "Using Kubernetes context: $CURRENT_CONTEXT"
           kubectl cluster-info
 
       - name: Apply Kubernetes manifests
