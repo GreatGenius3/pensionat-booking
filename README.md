@@ -170,7 +170,7 @@ kubectl get services
 För lokal utveckling med Docker Desktop Kubernetes:
 
 ```bash
-kubectl port-forward service/booking-service 8081:8081
+kubectl port-forward service/booking-service 8081:8080
 ```
 
 För riktigt kluster med LoadBalancer, använd den externa IP-adressen som tilldelas.
