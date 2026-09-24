@@ -81,9 +81,13 @@ jobs:
           mkdir -p $HOME/.kube
           echo "${{ secrets.KUBE_CONFIG }}" | base64 -d > $HOME/.kube/config
 
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -f k8s/
+
       - name: Update deployment image
         run: |
-          kubectl set image deployment/booking-service booking-service=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          IMAGE_NAME="$(printf '%s' "$GITHUB_REPOSITORY" | tr '[:upper:]' '[:lower:]')"
+          kubectl set image deployment/booking-service booking-service=${{ env.REGISTRY }}/$IMAGE_NAME:latest
 
-      - name: Restart deployment
-        run: kubectl rollout restart deployment/booking-service
+      - name: Wait for deployment
+        run: kubectl rollout status deployment/booking-service --timeout=180s
